@@ -31,13 +31,16 @@ class ObjectCreateMixin:
             return redirect(new_obj)
         return render(request, self.template, context={'form': bound_form})
 
+### This Mixin generating errors 'NoneType' object is not callable. I don't understand why
+
 class ObjectUpdateMixin:
     model = None
     form_model = None
     template = None
 
     def get(self, request, slug):
-        obj = self.model.objects.get(slug__iexact = slug)
+        obj = self.model.objects.get(slug__iexact=slug)
+        # in this i'm getting error
         bound_form = self.form_model(instance=obj)
         return render(request, self.template,
                           context={'form': bound_form,
@@ -52,3 +55,17 @@ class ObjectUpdateMixin:
             return redirect(new_obj)
         return render(request, self.template, context={'form': bound_form,
                                                            self.model.__name__.lower(): obj})
+
+class ObjectDeleteMixin:
+    model = None
+    template = None
+    redirect_url = None
+
+    def get(self, request, slug):
+        obj = self.model.objects.get(slug__iexact=slug)
+        return render(request, self.template, context={self.model.__name__.lower(): obj})
+
+    def post(self, request, slug):
+        obj = self.model.objects.get(slug__iexact=slug)
+        obj.delete()
+        return redirect(reverse(self.redirect_url))
