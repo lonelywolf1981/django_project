@@ -5,6 +5,7 @@ from .forms import *
 from .utils import *
 from .models import *
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 
 
 
@@ -13,7 +14,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 def posts_list(request):
     posts = Post.objects.all()
-    return render(request, 'blog/index.html', context={'posts': posts})
+    paginator = Paginator(posts, 2)
+    page_number = request.GET.get('page', 1)
+    page = paginator.get_page(page_number)
+    return render(request, 'blog/index.html', context={'posts': page.object_list})
 
 
 class PostDetail(ObjectDetailMixin, View):
@@ -57,7 +61,11 @@ class PostDelete(LoginRequiredMixin, ObjectDeleteMixin, View):
 
 def tags_list(request):
     tags = Tag.objects.all()
-    return render(request, 'blog/tags_list.html', context={'tags': tags})
+
+    paginator = Paginator(tags, 10)
+    page_number = request.GET.get('page', 1)
+    page = paginator.get_page(page_number)
+    return render(request, 'blog/tags_list.html', context={'tags': page.object_list})
 
 
 class TagDetail(ObjectDetailMixin, View):
